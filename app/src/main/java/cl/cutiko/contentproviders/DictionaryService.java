@@ -1,6 +1,7 @@
 package cl.cutiko.contentproviders;
 
 import android.app.IntentService;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -48,6 +49,17 @@ public class DictionaryService extends IntentService {
 
     private void dictionarySearch(String word){
 
+        /* Example for getting a single uri
+        * Uri singleUri = ContentUris.withAppendedId(UserDictionary.Words.CONTENT_URI,4);*/
+
+        /*This is how the selectionArgs work
+        * This is a very quick explanation http://stackoverflow.com/a/20777605/4017501 below original doc
+        * La expresión que especifica las filas para recuperar se divide en una cláusula de selección y argumentos de selección.
+        * La cláusula de selección es una combinación de expresiones lógicas y booleanas, nombres de columnas y valores (la variable mSelectionClause).
+        * Si especificas el parámetro reemplazable ? en lugar de un valor,
+        * el método de consulta obtiene el valor de la matriz de argumentos de selección (la variable mSelectionArgs).
+        * */
+
         String[] projection = {UserDictionary.Words._ID, UserDictionary.Words.WORD, UserDictionary.Words.LOCALE};
         String selection = UserDictionary.Words.WORD + " LIKE ?";
         String[] selectionArgs = {"%%%"+word+"%%%"};
@@ -63,12 +75,16 @@ public class DictionaryService extends IntentService {
 
 
         cursorIterator(cursor);
+        insertRow(cursor, word);
+    }
 
+    private void insertRow(Cursor cursor, String word){
         if (cursor == null) {
             Log.d("CURSOR", "is null");
         } else {
             if (cursor.getCount() > 0) {
                 Log.d("CURSOR_SIZE", String.valueOf(cursor.getCount()));
+                updateRows(word);
             } else {
                 ContentValues mNewValues = new ContentValues();
                 mNewValues.put(UserDictionary.Words.APP_ID, "example.user");
@@ -82,21 +98,37 @@ public class DictionaryService extends IntentService {
                 );
 
                 Log.d("INSERTION", newUri.toString());
+
+                /* The new Uri can be parse like this
+                *  ContentUris.parseId() */
             }
             cursor.close();
         }
+    }
 
+    private void updateRow(Uri uri){
+        long contentValues = ContentUris.parseId(uri);
+    }
 
-        /* Example for getting a single uri
-        * Uri singleUri = ContentUris.withAppendedId(UserDictionary.Words.CONTENT_URI,4);*/
+    private void updateRows(String word){
+        String selection = UserDictionary.Words.WORD + " LIKE ?";
+        String[] selectionArgs = {"%%%"+word+"%%%"};
 
-        /*This is how the selectionArgs work
-        * This is a very quick explanation http://stackoverflow.com/a/20777605/4017501 below original doc
-        * La expresión que especifica las filas para recuperar se divide en una cláusula de selección y argumentos de selección.
-        * La cláusula de selección es una combinación de expresiones lógicas y booleanas, nombres de columnas y valores (la variable mSelectionClause).
-        * Si especificas el parámetro reemplazable ? en lugar de un valor,
-        * el método de consulta obtiene el valor de la matriz de argumentos de selección (la variable mSelectionArgs).
-        * */
+        ContentValues contentValues = new ContentValues();
+        contentValues.putNull(UserDictionary.Words.FREQUENCY);
+        contentValues.put(UserDictionary.Words.LOCALE, "fake_Locale");
+        int updateCount = getContentResolver().update(
+                UserDictionary.Words.CONTENT_URI,
+                contentValues,
+                selection,
+                selectionArgs
+        );
+
+        Log.d("UPDATE_COUNT", String.valueOf(updateCount));
+    }
+
+    private void updateByCursor(){
+
     }
 
     private void cursorIterator(Cursor cursor){
