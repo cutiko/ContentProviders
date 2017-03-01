@@ -61,11 +61,14 @@ public class DictionaryService extends IntentService {
                 sort
         );
 
+
+        cursorIterator(cursor);
+
         if (cursor == null) {
             Log.d("CURSOR", "is null");
         } else {
             if (cursor.getCount() > 0) {
-                Log.d("CURSOR", String.valueOf(cursor.getCount()));
+                Log.d("CURSOR_SIZE", String.valueOf(cursor.getCount()));
             } else {
                 ContentValues mNewValues = new ContentValues();
                 mNewValues.put(UserDictionary.Words.APP_ID, "example.user");
@@ -94,6 +97,30 @@ public class DictionaryService extends IntentService {
         * Si especificas el parámetro reemplazable ? en lugar de un valor,
         * el método de consulta obtiene el valor de la matriz de argumentos de selección (la variable mSelectionArgs).
         * */
+    }
+
+    private void cursorIterator(Cursor cursor){
+        //Very elegant, such a loop, much while, wow, doge
+        if (cursor != null) {
+            int index = cursor.getColumnIndex(UserDictionary.Words.LOCALE);
+            //int index = cursor.getColumnIndex(UserDictionary.Words.WORD);
+            Log.d("INDEX", String.valueOf(index));
+            while (cursor.moveToNext()) {
+                //This is how getType work
+                int type = cursor.getType(index);
+                switch (type) {
+                    case Cursor.FIELD_TYPE_STRING:
+                        String word = cursor.getString(index);
+                        Log.d("WORD", word + " " + type);
+                        break;
+                    default:
+                        Log.d("TYPE", "another type");
+                        break;
+                }
+            }
+        } else {
+            Log.d("CURSOR", "is null");
+        }
     }
 
 }
