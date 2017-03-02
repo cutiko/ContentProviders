@@ -79,6 +79,7 @@ public class DictionaryService extends IntentService {
     }
 
     private void insertRow(Cursor cursor, String word){
+        //getContentResolver().bulkInsert() for massive inserts
         if (cursor == null) {
             Log.d("CURSOR", "is null");
         } else {
@@ -99,15 +100,19 @@ public class DictionaryService extends IntentService {
 
                 Log.d("INSERTION", newUri.toString());
 
-                /* The new Uri can be parse like this
-                *  ContentUris.parseId() */
+                updateRow(newUri);
             }
             cursor.close();
         }
     }
 
     private void updateRow(Uri uri){
-        long contentValues = ContentUris.parseId(uri);
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(UserDictionary.Words.FREQUENCY, "101");
+        String selection = UserDictionary.Words._ID + " = ?";
+        String[] selectionArgs = {String.valueOf(ContentUris.parseId(uri))};
+        int updates = getContentResolver().update(UserDictionary.Words.CONTENT_URI, contentValues, selection, selectionArgs);
+        Log.d("UPDATES", String.valueOf(updates));
     }
 
     private void updateRows(String word){
@@ -125,10 +130,6 @@ public class DictionaryService extends IntentService {
         );
 
         Log.d("UPDATE_COUNT", String.valueOf(updateCount));
-    }
-
-    private void updateByCursor(){
-
     }
 
     private void cursorIterator(Cursor cursor){
@@ -156,3 +157,5 @@ public class DictionaryService extends IntentService {
     }
 
 }
+
+
