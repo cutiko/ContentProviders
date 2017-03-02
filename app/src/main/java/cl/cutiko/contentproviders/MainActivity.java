@@ -30,6 +30,13 @@ public class MainActivity extends AppCompatActivity {
                 DictionaryService.startDictionary(MainActivity.this, searchEt.getText().toString());
             }
         });
+        fab.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                DictionaryService.startDelete(MainActivity.this, searchEt.getText().toString());
+                return true;
+            }
+        });
     }
 
 }

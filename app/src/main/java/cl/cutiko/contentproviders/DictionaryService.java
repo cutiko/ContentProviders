@@ -15,6 +15,7 @@ import java.util.Locale;
 public class DictionaryService extends IntentService {
 
     private static final String ACTION_DICTIONARY = "cl.cutiko.contentproviders.action.ACTION_DICTIONARY";
+    private static final String ACTION_DICTIONARY_DELETE = "cl.cutiko.contentproviders.action.ACTION_DICTIONARY_DELETE";
     private static final String WORD = "cl.cutiko.contentproviders.extra.WORD";
 
 
@@ -30,13 +31,22 @@ public class DictionaryService extends IntentService {
         context.startService(intent);
     }
 
+    public static void startDelete(Context context, String word) {
+        Intent intent = new Intent(context, DictionaryService.class);
+        intent.putExtra(WORD, word);
+        intent.setAction(ACTION_DICTIONARY_DELETE);
+        context.startService(intent);
+    }
+
     @Override
     protected void onHandleIntent(Intent intent) {
         if (intent != null) {
             final String action = intent.getAction();
+            final String word = intent.getStringExtra(DictionaryService.WORD);
             if (ACTION_DICTIONARY.equals(action)) {
-                final String word = intent.getStringExtra(DictionaryService.WORD);
                 searchValidation(word);
+            } else if (ACTION_DICTIONARY_DELETE.equals(action)) {
+                deleteRows(word);
             }
         }
     }
@@ -154,6 +164,15 @@ public class DictionaryService extends IntentService {
         } else {
             Log.d("CURSOR", "is null");
         }
+    }
+
+    private void deleteRows(String word){
+        String selection = UserDictionary.Words.WORD + " = ?";
+        String[] selectionArgs = {word};
+
+        int deletedRows = getContentResolver().delete(UserDictionary.Words.CONTENT_URI, selection, selectionArgs);
+
+        Log.d("DELETED", String.valueOf(deletedRows));
     }
 
 }
