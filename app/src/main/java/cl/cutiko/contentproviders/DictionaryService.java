@@ -90,6 +90,25 @@ public class DictionaryService extends IntentService {
 
     private void insertRow(Cursor cursor, String word){
         //getContentResolver().bulkInsert() for massive inserts
+        //Other way to do massive inserts
+        /*ArrayList<ContentProviderOperation> ops =
+                new ArrayList<ContentProviderOperation>();
+        ...
+        int rawContactInsertIndex = ops.size();
+        ops.add(ContentProviderOperation.newInsert(RawContacts.CONTENT_URI)
+                .withValue(RawContacts.ACCOUNT_TYPE, accountType)
+                .withValue(RawContacts.ACCOUNT_NAME, accountName)
+                .build());
+
+        ops.add(ContentProviderOperation.newInsert(Data.CONTENT_URI)
+                .withValueBackReference(Data.RAW_CONTACT_ID, rawContactInsertIndex)
+                .withValue(Data.MIMETYPE, StructuredName.CONTENT_ITEM_TYPE)
+                .withValue(StructuredName.DISPLAY_NAME, "Mike Sullivan")
+                .build());
+
+        getContentResolver().applyBatch(ContactsContract.AUTHORITY, ops);*/
+        //FOUND here: https://developer.android.com/reference/android/provider/ContactsContract.RawContacts.html?hl=es-419
+
         if (cursor == null) {
             Log.d("CURSOR", "is null");
         } else {
