@@ -1,13 +1,17 @@
 package cl.cutiko.contentproviders;
 
+import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.UserDictionary;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+
+import java.util.Locale;
 
 /**
  * Created by cutiko on 08-03-17.
@@ -19,31 +23,29 @@ import android.util.Log;
 * bundle should be for passing extra params or for getting params of a previous activity, but not for assembling the query*/
 public class DictionaryLoader implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    private static final int CUSTOM_LOADER_ID = 343;
-    public static final String URI = "cl.cutiko.contentproviders.CustomLoaderManager.URI";
-    public static final String PROJECTION = "cl.cutiko.contentproviders.CustomLoaderManager.PROJECTION";
-    public static final java.lang.String SELECTION = "cl.cutiko.contentproviders.CustomLoaderManager.SELECTION";
-    public static final String ARGUMENTS = "cl.cutiko.contentproviders.CustomLoaderManager.ARGUMENTS";
-    public static final String SORT = "cl.cutiko.contentproviders.CustomLoaderManager.SORT";
-    private final AppCompatActivity activity;
+    private String word;
     private final LoaderManager loaderManager;
+    private final Context context;
+    private static final int CUSTOM_LOADER_ID = 343;
+    private CursorLoader cursorLoader;
 
-    public DictionaryLoader(AppCompatActivity activity, Bundle args) {
-        this.activity = activity;
-        loaderManager = activity.getSupportLoaderManager();
-        loaderManager.initLoader(CUSTOM_LOADER_ID, args, this);
+    public DictionaryLoader(String word, LoaderManager loaderManager, Context context) {
+        this.word = word;
+        this.loaderManager = loaderManager;
+        this.context = context;
+        loaderManager.initLoader(CUSTOM_LOADER_ID, null, this);
     }
-
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         Log.d("onCreateLoader", "id: " + String.valueOf(id));
-        Uri uri = Uri.parse(args.getString(URI));
-        String[] projection = args.getStringArray(PROJECTION);
-        String selection = args.getString(SELECTION);
-        String[] selectionArgs = args.getStringArray(ARGUMENTS);
-        String sort = args.getString(SORT);
-        return new CursorLoader(activity, uri, projection, selection, selectionArgs, sort);
+        Uri uri = UserDictionary.Words.CONTENT_URI;
+        String[] projection = {UserDictionary.Words._ID, UserDictionary.Words.WORD, UserDictionary.Words.LOCALE};
+        String selection = UserDictionary.Words.WORD + " LIKE ?";
+        String[] selectionArgs = {"%%%"+word+"%%%"};
+        String sort = UserDictionary.Words._ID + " ASC";
+        cursorLoader = new CursorLoader(context, uri, projection, selection, selectionArgs, sort);
+        return cursorLoader;
     }
 
     @Override
@@ -54,6 +56,9 @@ public class DictionaryLoader implements LoaderManager.LoaderCallbacks<Cursor> {
             Log.d("CURSOR", "is not null");
             int size = data.getCount();
             Log.d("CURSOR_ SIZE", String.valueOf(size));
+            if (size == 0) {
+                insert();
+            }
         } else {
             Log.d("CURSOR", "is null");
         }
@@ -62,6 +67,27 @@ public class DictionaryLoader implements LoaderManager.LoaderCallbacks<Cursor> {
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-
+        Log.d("onLoaderReset", "event");
     }
+    private void insert(){
+        ContentValues mNewValues = new ContentValues();
+        mNewValues.put(UserDictionary.Words.APP_ID, "example.user");
+        mNewValues.put(UserDictionary.Words.LOCALE, Locale.getDefault().toString());
+        mNewValues.put(UserDictionary.Words.WORD, word);
+        mNewValues.put(UserDictionary.Words.FREQUENCY, "100");
+
+        Uri newUri = context.getContentResolver().insert(
+                UserDictionary.Words.CONTENT_URI,
+                mNewValues
+        );
+
+        Log.d("INSERT", newUri.getPath());
+    }
+
+    public void update(String word) {
+        this.word = word;
+        loaderManager.restartLoader(CUSTOM_LOADER_ID, null, this);
+    }
+
+
 }

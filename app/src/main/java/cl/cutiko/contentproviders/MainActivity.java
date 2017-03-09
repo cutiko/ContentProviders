@@ -1,9 +1,10 @@
 package cl.cutiko.contentproviders;
 
+import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.provider.UserDictionary;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -14,10 +15,10 @@ import android.widget.EditText;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final int EXAMPLE_LOADER_ID = 323;
     private EditText searchEt;
     private RecyclerView recyclerView;
     private DictionaryCursorAdapter adapter;
+    private MainDictionaryLoader mainDictionaryLoader;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,15 +43,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 //DictionaryService.startDictionary(MainActivity.this, searchEt.getText().toString());
-                Bundle bundle = new Bundle();
-                bundle.putString(DictionaryLoader.URI, String.valueOf(UserDictionary.Words.CONTENT_URI));
-                bundle.putStringArray(DictionaryLoader.PROJECTION, new String[]{UserDictionary.Words._ID, UserDictionary.Words.WORD, UserDictionary.Words.LOCALE});
-                bundle.putString(DictionaryLoader.SELECTION, UserDictionary.Words.WORD + " LIKE ?");
-                bundle.putStringArray(DictionaryLoader.ARGUMENTS, new String[]{"%%%"+searchEt.getText().toString()+"%%%"});
-                bundle.putString(DictionaryLoader.SORT, UserDictionary.Words._ID + " ASC");
                 //new DictionaryLoader(MainActivity.this, bundle);
-                //TODO update cursor instead of recreating it
-                new MainDictionaryLoader(MainActivity.this, bundle);
+                String word = searchEt.getText().toString();
+                if (mainDictionaryLoader == null) {
+                    mainDictionaryLoader = new MainDictionaryLoader(word, getSupportLoaderManager(), MainActivity.this);
+                } else {
+                    mainDictionaryLoader.update(word);
+                }
+
             }
         });
         fab.setOnLongClickListener(new View.OnLongClickListener() {
@@ -64,8 +64,9 @@ public class MainActivity extends AppCompatActivity {
 
     private class MainDictionaryLoader extends DictionaryLoader {
 
-        public MainDictionaryLoader(AppCompatActivity activity, Bundle args) {
-            super(activity, args);
+
+        public MainDictionaryLoader(String word, LoaderManager loaderManager, Context context) {
+            super(word, loaderManager, context);
         }
 
         @Override
