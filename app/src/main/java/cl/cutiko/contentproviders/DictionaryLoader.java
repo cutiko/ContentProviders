@@ -17,7 +17,7 @@ import android.util.Log;
 * such a thing as a completely god class that can be applied to any content resolver is not consistent with the implemented methods,
 * look at the methods, the logic of whatever is done is tied to the query,
 * bundle should be for passing extra params or for getting params of a previous activity, but not for assembling the query*/
-public class CustomLoaderManager implements LoaderManager.LoaderCallbacks<Cursor> {
+public class DictionaryLoader implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final int CUSTOM_LOADER_ID = 343;
     public static final String URI = "cl.cutiko.contentproviders.CustomLoaderManager.URI";
@@ -28,7 +28,7 @@ public class CustomLoaderManager implements LoaderManager.LoaderCallbacks<Cursor
     private final AppCompatActivity activity;
     private final LoaderManager loaderManager;
 
-    public CustomLoaderManager(AppCompatActivity activity, Bundle args) {
+    public DictionaryLoader(AppCompatActivity activity, Bundle args) {
         this.activity = activity;
         loaderManager = activity.getSupportLoaderManager();
         loaderManager.initLoader(CUSTOM_LOADER_ID, args, this);
@@ -57,6 +57,7 @@ public class CustomLoaderManager implements LoaderManager.LoaderCallbacks<Cursor
         } else {
             Log.d("CURSOR", "is null");
         }
+
     }
 
     @Override
