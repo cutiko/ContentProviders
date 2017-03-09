@@ -27,7 +27,6 @@ public class DictionaryLoader implements LoaderManager.LoaderCallbacks<Cursor> {
     private final LoaderManager loaderManager;
     private final Context context;
     private static final int CUSTOM_LOADER_ID = 343;
-    private CursorLoader cursorLoader;
 
     public DictionaryLoader(String word, LoaderManager loaderManager, Context context) {
         this.word = word;
@@ -44,8 +43,7 @@ public class DictionaryLoader implements LoaderManager.LoaderCallbacks<Cursor> {
         String selection = UserDictionary.Words.WORD + " LIKE ?";
         String[] selectionArgs = {"%%%"+word+"%%%"};
         String sort = UserDictionary.Words._ID + " ASC";
-        cursorLoader = new CursorLoader(context, uri, projection, selection, selectionArgs, sort);
-        return cursorLoader;
+        return new CursorLoader(context, uri, projection, selection, selectionArgs, sort);
     }
 
     @Override
@@ -70,6 +68,7 @@ public class DictionaryLoader implements LoaderManager.LoaderCallbacks<Cursor> {
         Log.d("onLoaderReset", "event");
     }
     private void insert(){
+        //This operation should be done by creating a class that inherits the CursorLoader class
         ContentValues mNewValues = new ContentValues();
         mNewValues.put(UserDictionary.Words.APP_ID, "example.user");
         mNewValues.put(UserDictionary.Words.LOCALE, Locale.getDefault().toString());
