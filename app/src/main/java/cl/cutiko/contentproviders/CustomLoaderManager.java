@@ -1,5 +1,6 @@
 package cl.cutiko.contentproviders;
 
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
@@ -11,8 +12,12 @@ import android.util.Log;
 /**
  * Created by cutiko on 08-03-17.
  */
-
-public class CustomLoaderManager implements LoaderManager.LoaderCallbacks {
+/*Encapsulation in this class should consider enclosing the query for the content resolver,
+* there is no point in having the bundle as a param for constructing the query with it,
+* such a thing as a completely god class that can be applied to any content resolver is not consistent with the implemented methods,
+* look at the methods, the logic of whatever is done is tied to the query,
+* bundle should be for passing extra params or for getting params of a previous activity, but not for assembling the query*/
+public class CustomLoaderManager implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final int CUSTOM_LOADER_ID = 343;
     public static final String URI = "cl.cutiko.contentproviders.CustomLoaderManager.URI";
@@ -31,7 +36,7 @@ public class CustomLoaderManager implements LoaderManager.LoaderCallbacks {
 
 
     @Override
-    public Loader onCreateLoader(int id, Bundle args) {
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         Log.d("onCreateLoader", "id: " + String.valueOf(id));
         Uri uri = Uri.parse(args.getString(URI));
         String[] projection = args.getStringArray(PROJECTION);
@@ -42,19 +47,20 @@ public class CustomLoaderManager implements LoaderManager.LoaderCallbacks {
     }
 
     @Override
-    public void onLoadFinished(Loader loader, Object data) {
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         /*if something then restart the loader
         loaderManager.restartLoader(CUSTOM_LOADER_ID, null, this);*/
         if (data != null) {
-            Log.d("onLoadFinished", "data is not null");
+            Log.d("CURSOR", "is not null");
+            int size = data.getCount();
+            Log.d("CURSOR_ SIZE", String.valueOf(size));
         } else {
-            Log.d("onLoadFinished", "is not null");
+            Log.d("CURSOR", "is null");
         }
-
     }
 
     @Override
-    public void onLoaderReset(Loader loader) {
+    public void onLoaderReset(Loader<Cursor> loader) {
 
     }
 }
