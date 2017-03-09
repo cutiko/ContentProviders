@@ -29,7 +29,8 @@ public class MainActivity extends AppCompatActivity {
         searchEt = (EditText) findViewById(R.id.searchEt);
         recyclerView = (RecyclerView) findViewById(R.id.dictionaryRv);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        //adapter = new DictionaryCursorAdapter(null);
+        adapter = new DictionaryCursorAdapter();
+        recyclerView.setAdapter(adapter);
         setFab();
 
 
@@ -48,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
                 bundle.putStringArray(DictionaryLoader.ARGUMENTS, new String[]{"%%%"+searchEt.getText().toString()+"%%%"});
                 bundle.putString(DictionaryLoader.SORT, UserDictionary.Words._ID + " ASC");
                 //new DictionaryLoader(MainActivity.this, bundle);
+                //TODO update cursor instead of recreating it
                 new MainDictionaryLoader(MainActivity.this, bundle);
             }
         });
@@ -66,12 +68,10 @@ public class MainActivity extends AppCompatActivity {
             super(activity, args);
         }
 
-
         @Override
         public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
             super.onLoadFinished(loader, data);
-            adapter = new DictionaryCursorAdapter(data);
-            recyclerView.setAdapter(adapter);
+            adapter.addCursor(data);
         }
     }
 }

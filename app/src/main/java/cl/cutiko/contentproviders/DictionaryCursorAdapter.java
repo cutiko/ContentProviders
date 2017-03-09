@@ -1,7 +1,9 @@
 package cl.cutiko.contentproviders;
 
 import android.database.Cursor;
+import android.database.DataSetObserver;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,10 +15,11 @@ import android.widget.TextView;
 
 public class DictionaryCursorAdapter extends RecyclerView.Adapter<DictionaryCursorAdapter.ViewHolder> {
 
-    private final Cursor cursor;
+    private Cursor cursor;
+    private final CursorObserver observer;
 
-    public DictionaryCursorAdapter(Cursor cursor) {
-        this.cursor = cursor;
+    public DictionaryCursorAdapter() {
+        observer = new CursorObserver();
     }
 
     @Override
@@ -42,6 +45,22 @@ public class DictionaryCursorAdapter extends RecyclerView.Adapter<DictionaryCurs
         }
     }
 
+    public void addCursor(Cursor cursor) {
+        Log.d("addCursor", "start");
+        if (cursor != null) {
+            Log.d("addCursor", "cursor not null");
+            this.cursor = cursor;
+            //this.cursor.registerDataSetObserver(observer);
+            notifyDataSetChanged();
+        } else {
+            Log.d("addCursor", "cursor null");
+            if (this.cursor != null) {
+                Log.d("addCursor", "cursor null, this.cursor not null");
+                //this.cursor.unregisterDataSetObserver(observer);
+            }
+        }
+    }
+
 
     class ViewHolder extends RecyclerView.ViewHolder {
 
@@ -56,6 +75,21 @@ public class DictionaryCursorAdapter extends RecyclerView.Adapter<DictionaryCurs
         public void setView(String word, String locale) {
             this.word.setText(word);
             this.locale.setText(locale);
+        }
+    }
+
+    private class CursorObserver extends DataSetObserver {
+
+        @Override
+        public void onChanged() {
+            super.onChanged();
+            notifyDataSetChanged();
+        }
+
+        @Override
+        public void onInvalidated() {
+            super.onInvalidated();
+            notifyDataSetChanged();
         }
     }
 
